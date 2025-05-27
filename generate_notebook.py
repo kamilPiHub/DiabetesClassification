@@ -33,7 +33,7 @@ notebook_json_structure = {
    "metadata": {},
    "source": [
     "## Autorzy/Autor",
-    "IMIĘ NAZWISKO (numer indeksu)"
+    "Kamil Pizon, Filip Obuchowicz"
    ]
   },
   {
