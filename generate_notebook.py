@@ -12,15 +12,14 @@ from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 import warnings
 import os
+import json # Dodajemy import json
 
 warnings.filterwarnings('ignore')
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
-# Utworzenie treści Jupyter Notebook w formie listy stringów
-notebook_content = []
-
-notebook_content.append("""
-{
+# Utworzenie treści Jupyter Notebook w formie słownika, a nie listy stringów
+# To jest bezpieczniejszy sposób na generowanie JSON
+notebook_json_structure = {
  "cells": [
   {
    "cell_type": "markdown",
@@ -66,7 +65,8 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "## Przedmiot badania i Cel",
-    "**Przedmiot badania:** Zbiór danych 'diabetes_012_health_indicators_BRFSS2015.csv', zawierający dane zdrowotne i demograficzne ankietowanych osób z badania BRFSS (Behavioral Risk Factor Surveillance System) z 2015 roku, z informacją o statusie cukrzycowym (brak cukrzycy, pre-cukrzyca, cukrzyca).\n",
+    "**Przedmiot badania:** Zbiór danych 'diabetes_012_health_indicators_BRFSS2015.csv', zawierający dane zdrowotne i demograficzne ankietowanych osób z badania BRFSS (Behavioral Risk Factor Surveillance System) z 2015 roku, z informacją o statusie cukrzycowym (brak cukrzycy, pre-cukrzyca, cukrzyca).\\n",
+    "Dla uproszczenia problemu klasyfikacji, zmienna docelowa zostanie przekształcona na binarną, gdzie 0 oznacza brak cukrzycy, a 1 oznacza pre-cukrzycę lub cukrzycę. Pozostałe zmienne to wskaźniki zdrowotne i demograficzne. Poniżej przedstawiono listę zmiennych objaśniających.\\n",
     "**Cel:** Głównym celem projektu jest opracowanie i ocena modeli klasyfikacyjnych, które będą w stanie skutecznie przewidywać ryzyko wystąpienia cukrzycy (lub jej braku) na podstawie dostępnych zmiennych. Dodatkowo, projekt ma na celu porównanie wydajności różnych algorytmów uczenia maszynowego oraz zrozumienie, które zmienne mają największy wpływ na predykcję ryzyka cukrzycy."
    ]
   },
@@ -82,16 +82,16 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "### Opis danych i zmiennych",
-    "Wykorzystany zbiór danych `diabetes_012_health_indicators_BRFSS2015.csv` pochodzi z badania BRFSS 2015, zbierającego dane dotyczące zdrowia dorosłych Amerykanów. Zawiera on 22 zmienne, w tym zmienną docelową `Diabetes_012`, która klasyfikuje status cukrzycowy:\n",
-    "- 0: brak cukrzycy\n",
-    "- 1: pre-cukrzyca\n",
-    "- 2: cukrzyca\n",
+    "Wykorzystany zbiór danych `diabetes_012_health_indicators_BRFSS2015.csv` pochodzi z badania BRFSS 2015, zbierającego dane dotyczące zdrowia dorosłych Amerykanów. Zawiera on 22 zmienne, w tym zmienną docelową `Diabetes_012`, która klasyfikuje status cukrzycowy:\\n",
+    "- 0: brak cukrzycy\\n",
+    "- 1: pre-cukrzyca\\n",
+    "- 2: cukrzyca\\n",
     "Dla uproszczenia problemu klasyfikacji, zmienna docelowa zostanie przekształcona na binarną, gdzie 0 oznacza brak cukrzycy, a 1 oznacza pre-cukrzycę lub cukrzycę. Pozostałe zmienne to wskaźniki zdrowotne i demograficzne. Poniżej przedstawiono listę zmiennych objaśniających:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -116,7 +116,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -135,7 +135,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -174,16 +174,16 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "### Braki danych i obserwacje odstające",
-    "Przed przystąpieniem do modelowania kluczowe jest sprawdzenie braków danych i obsługi obserwacji odstających. Brakujące wartości mogą prowadzić do błędnych wyników, a obserwacje odstające mogą zniekształcać modele. \n",
-    "\n",
-    "**Braki danych:** Sprawdzamy, czy w zbiorze danych występują brakujące wartości. Jeśli tak, w zależności od ich liczby i charakteru, można je uzupełnić (np. średnią, medianą, modą) lub usunąć wiersze/kolumny zawierające braki. W tym zbiorze danych nie ma brakujących wartości, co upraszcza preprocessing.\n",
-    "\n",
+    "Przed przystąpieniem do modelowania kluczowe jest sprawdzenie braków danych i obsługi obserwacji odstających. Brakujące wartości mogą prowadzić do błędnych wyników, a obserwacje odstające mogą zniekształcać modele. \\n",
+    "\\n",
+    "**Braki danych:** Sprawdzamy, czy w zbiorze danych występują brakujące wartości. Jeśli tak, w zależności od ich liczby i charakteru, można je uzupełnić (np. średnią, medianą, modą) lub usunąć wiersze/kolumny zawierające braki. W tym zbiorze danych nie ma brakujących wartości, co upraszcza preprocessing.\\n",
+    "\\n",
     "**Obserwacje odstające:** Obserwacje odstające to punkty danych, które znacznie odbiegają od większości danych. Można je identyfikować za pomocą metod statystycznych (np. IQR) lub wizualizacji (np. boxploty). W przypadku wielu zmiennych z potencjalnymi wartościami odstającymi, takimi jak BMI, MentHlth czy PhysHlth, skalowanie danych (np. MinMaxScaler) oraz ewentualne transformacje (np. logarytmowanie) pomagają zmniejszyć ich wpływ na modele, zwłaszcza te wrażliwe na skalę zmiennych (np. KNN)."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -197,14 +197,14 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "### Transformacje danych (Skalowanie i Logarytmowanie)",
-    "**Logarytmowanie:** Zmienne o skośnym rozkładzie (np. `BMI`, `MentHlth`, `PhysHlth`, `Age`, `Education`, `Income`) mogą skorzystać z transformacji logarytmicznej, która pomaga zmniejszyć skośność i sprowadzić rozkład do bardziej zbliżonego do normalnego. Użyto `np.log1p`, która oblicza `log(1+x)`, co jest przydatne, gdy dane zawierają zera.\n",
-    "\n",
+    "**Logarytmowanie:** Zmienne o skośnym rozkładzie (np. `BMI`, `MentHlth`, `PhysHlth`, `Age`, `Education`, `Income`) mogą skorzystać z transformacji logarytmicznej, która pomaga zmniejszyć skośność i sprowadzić rozkład do bardziej zbliżonego do normalnego. Użyto `np.log1p`, która oblicza `log(1+x)`, co jest przydatne, gdy dane zawierają zera.\\n",
+    "\\n",
     "**Skalowanie:** Algorytmy uczenia maszynowego oparte na odległości (np. KNN) są wrażliwe na skalę zmiennych. `MinMaxScaler` skaluje każdą zmienną do zakresu [0, 1], co zapewnia, że żadna zmienna nie dominuje nad innymi ze względu na jej większy zakres wartości."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -235,7 +235,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -263,7 +263,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -284,7 +284,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -310,13 +310,13 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "#### K-Nearest Neighbors (KNN)",
-    "**Opis:** KNN to algorytm klasyfikacyjny oparty na odległości. Klasyfikuje nową obserwację na podstawie większości głosów jej 'k' najbliższych sąsiadów w przestrzeni cech. Działa na zasadzie 'leniwego uczenia' (lazy learning), co oznacza, że nie buduje modelu podczas fazy treningowej, a jedynie przechowuje dane treningowe i wykonuje obliczenia dopiero w momencie predykcji.  Wartość `k` (liczba sąsiadów) jest kluczowym hiperparametrem. \n",
-    "**Referencje:** Fix, E., & Hodges, J. L. (1951). *Discriminatory Analysis. Nonparametric Discrimination: Consistency Properties.* USAF School of Aviation Medicine, Randolph Field, Texas.  (Choć formalnie praca jest z 1951, koncepcja KNN była rozwijana w latach 60. i 70. przez m.in. T. Covera i P. Hart'a).\n"
+    "**Opis:** KNN to algorytm klasyfikacyjny oparty na odległości. Klasyfikuje nową obserwację na podstawie większości głosów jej 'k' najbliższych sąsiadów w przestrzeni cech. Działa na zasadzie 'leniwego uczenia' (lazy learning), co oznacza, że nie buduje modelu podczas fazy treningowej, a jedynie przechowuje dane treningowe i wykonuje obliczenia dopiero w momencie predykcji.  Wartość `k` (liczba sąsiadów) jest kluczowym hiperparametrem. \\n",
+    "**Referencje:** Fix, E., & Hodges, J. L. (1951). *Discriminatory Analysis. Nonparametric Discrimination: Consistency Properties.* USAF School of Aviation Medicine, Randolph Field, Texas.  (Choć formalnie praca jest z 1951, koncepcja KNN była rozwijana w latach 60. i 70. przez m.in. T. Covera i P. Hart'a)."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -339,13 +339,13 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "#### Drzewo Decyzyjne (Decision Tree)",
-    "**Opis:** Drzewo decyzyjne to model klasyfikacyjny, który konstruuje drzewo, gdzie każdy węzeł wewnętrzny reprezentuje test na atrybucie, każda gałąź reprezentuje wynik testu, a każdy liść (węzeł końcowy) reprezentuje etykietę klasy. Proces budowy drzewa polega na rekurencyjnym dzieleniu danych na podgrupy na podstawie cech, które najlepiej rozdzielają klasy. \n",
-    "**Referencje:** Quinlan, J. R. (1986). *Induction of decision trees.* Machine learning, 1(1), 81-106.\n"
+    "**Opis:** Drzewo decyzyjne to model klasyfikacyjny, który konstruuje drzewo, gdzie każdy węzeł wewnętrzny reprezentuje test na atrybucie, każda gałąź reprezentuje wynik testu, a każdy liść (węzeł końcowy) reprezentuje etykietę klasy. Proces budowy drzewa polega na rekurencyjnym dzieleniu danych na podgrupy na podstawie cech, które najlepiej rozdzielają klasy. \\n",
+    "**Referencje:** Quinlan, J. R. (1986). *Induction of decision trees.* Machine learning, 1(1), 81-106."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -373,7 +373,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -388,13 +388,13 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "#### Las Losowy (Random Forest)",
-    "**Opis:** Random Forest to algorytm zespołowy (ensemble learning), który buduje wiele drzew decyzyjnych podczas treningu i wyprowadza klasę, która jest modą klas (klasyfikacja) lub średnią predykcji (regresja) poszczególnych drzew. Kluczową ideą jest losowe wybieranie podzbiorów cech i podpróbek danych treningowych dla każdego drzewa, co zwiększa różnorodność i redukuje wariancję, prowadząc do lepszej generalizacji. \n",
-    "**Referencje:** Breiman, L. (2001). *Random Forests.* Machine Learning, 45(1), 5-32.\n"
+    "**Opis:** Random Forest to algorytm zespołowy (ensemble learning), który buduje wiele drzew decyzyjnych podczas treningu i wyprowadza klasę, która jest modą klas (klasyfikacja) lub średnią predykcji (regresja) poszczególnych drzew. Kluczową ideą jest losowe wybieranie podzbiorów cech i podpróbek danych treningowych dla każdego drzewa, co zwiększa różnorodność i redukuje wariancję, prowadząc do lepszej generalizacji. \\n",
+    "**Referencje:** Breiman, L. (2001). *Random Forests.* Machine Learning, 45(1), 5-32."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -417,13 +417,13 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "#### Model Hybrydowy (Ensemble - Średnia Ważona Prawdopodobieństw)",
-    "**Opis:** Model hybrydowy łączy predykcje z wielu modeli bazowych w celu uzyskania lepszej ogólnej wydajności niż pojedynczy model. W tym przypadku zastosowano proste uśrednianie prawdopodobieństw przewidywanych przez każdy z trzech modeli (KNN, Drzewo Decyzyjne, Random Forest). Można również zastosować średnią ważoną, jeśli z eksperymentów wynika, że niektóre modele są bardziej wiarygodne. Klasyfikacja odbywa się poprzez zaokrąglenie średniego prawdopodobieństwa do najbliższej liczby całkowitej (0 lub 1). \n",
-    "**Referencje:** Rokach, L. (2010). *Ensemble-based classifiers*. The Data Mining and Knowledge Discovery Handbook, 193-219. (Ogólna koncepcja modeli zespołowych).\n"
+    "**Opis:** Model hybrydowy łączy predykcje z wielu modeli bazowych w celu uzyskania lepszej ogólnej wydajności niż pojedynczy model. W tym przypadku zastosowano proste uśrednianie prawdopodobieństw przewidywanych przez każdy z trzech modeli (KNN, Drzewo Decyzyjne, Random Forest). Można również zastosować średnią ważoną, jeśli z eksperymentów wynika, że niektóre modele są bardziej wiarygodne. Klasyfikacja odbywa się poprzez zaokrąglenie średniego prawdopodobieństwa do najbliższej liczby całkowitej (0 lub 1). \\n",
+    "**Referencje:** Rokach, L. (2010). *Ensemble-based classifiers*. The Data Mining and Knowledge Discovery Handbook, 193-219. (Ogólna koncepcja modeli zespołowych)."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -455,7 +455,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -489,7 +489,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -522,9 +522,10 @@ notebook_content.append("""
     "ax = plt.gca()\n",
     "RocCurveDisplay.from_estimator(model_knn, X_test, y_test, ax=ax, name='KNN')\n",
     "RocCurveDisplay.from_estimator(model_dt, X_test, y_test, ax=ax, name='Decision Tree')\n",
-    "RocCurveDisplay.from_estimator(model_rf, X_test, y_test, y_proba=y_proba_rf, ax=ax, name='Random Forest') # Prawdopodobieństwa RF są już dostępne\n",
+    "RocCurveDisplay.from_estimator(model_rf, X_test, y_test, ax=ax, name='Random Forest')\n",
     "plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', label='Random Guess')\n",
     "plt.title('Krzywe ROC dla Modeli Klasyfikacyjnych')\n",
+    "plt.legend()\n",
     "plt.show()"
    ]
   },
@@ -538,7 +539,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -589,7 +590,7 @@ notebook_content.append("""
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -642,7 +643,7 @@ notebook_content.append("""
     "\n",
     "sample_risk_scaled = scaler.transform(sample_risk_processed)\n",
     "\n",
-    "print(\"\\nPredykcje dla osoby z ryzykiem:\")\n",
+    "print(f\"\\nPredykcje dla osoby z ryzykiem:\")\n",
     "print(f\"KNN przewiduje: {'Cukrzyca' if model_knn.predict(sample_risk_scaled)[0] == 1 else 'Brak cukrzycy'}\")\n",
     "print(f\"Drzewo Decyzyjne przewiduje: {'Cukrzyca' if model_dt.predict(sample_risk_scaled)[0] == 1 else 'Brak cukrzycy'}\")\n",
     "print(f\"Random Forest przewiduje: {'Cukrzyca' if model_rf.predict(sample_risk_scaled)[0] == 1 else 'Brak cukrzycy'}\")\n",
@@ -658,11 +659,11 @@ notebook_content.append("""
    "metadata": {},
    "source": [
     "## Bibliografia",
-    "\\* Breiman, L. (2001). *Random Forests.* Machine Learning, 45(1), 5-32.\n",
-    "\\* Fix, E., & Hodges, J. L. (1951). *Discriminatory Analysis. Nonparametric Discrimination: Consistency Properties.* USAF School of Aviation Medicine, Randolph Field, Texas.\n",
-    "\\* Quinlan, J. R. (1986). *Induction of decision trees.* Machine learning, 1(1), 81-106.\n",
-    "\\* Rokach, L. (2010). *Ensemble-based classifiers*. The Data Mining and Knowledge Discovery Handbook, 193-219.\n",
-    "\\* Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). *SMOTE: synthetic minority over-sampling technique*. Journal of artificial intelligence research, 16, 321-357.\n"
+    "\\* Breiman, L. (2001). *Random Forests.* Machine Learning, 45(1), 5-32.\\n",
+    "\\* Fix, E., & Hodges, J. L. (1951). *Discriminatory Analysis. Nonparametric Discrimination: Consistency Properties.* USAF School of Aviation Medicine, Randolph Field, Texas.\\n",
+    "\\* Quinlan, J. R. (1986). *Induction of decision trees.* Machine learning, 1(1), 81-106.\\n",
+    "\\* Rokach, L. (2010). *Ensemble-based classifiers*. The Data Mining and Knowledge Discovery Handbook, 193-219.\\n",
+    "\\* Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). *SMOTE: synthetic minority over-sampling technique*. Journal of artificial intelligence research, 16, 321-357."
    ]
   }
  ],
@@ -688,11 +689,10 @@ notebook_content.append("""
  "nbformat": 4,
  "nbformat_minor": 4
 }
-""")
 
 # Zapisz zawartość do pliku .ipynb
 with open("Diabetes_Risk_Classification_Project.ipynb", "w", encoding="utf-8") as f:
-    f.write("".join(notebook_content[0]))
+    json.dump(notebook_json_structure, f, indent=2) # Używamy json.dump dla poprawnego formatowania
 
 print("Plik 'Diabetes_Risk_Classification_Project.ipynb' został pomyślnie wygenerowany.")
 print("Możesz go otworzyć w środowisku Jupyter.")
