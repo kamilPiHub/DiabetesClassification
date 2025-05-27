@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,13 +13,11 @@ from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 import warnings
 import os
-import json # Dodajemy import json
+
 
 warnings.filterwarnings('ignore')
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
-# Utworzenie treści Jupyter Notebook w formie słownika, a nie listy stringów
-# To jest bezpieczniejszy sposób na generowanie JSON
 notebook_json_structure = {
  "cells": [
   {
@@ -32,8 +31,8 @@ notebook_json_structure = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Autorzy/Autor",
-    "Kamil Pizon, Filip Obuchowicz"
+    "## Autorzy",
+    "Filip Obuchowicz, Kamil Pizon"
    ]
   },
   {
@@ -129,8 +128,8 @@ notebook_json_structure = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### Podstawowa wizualizacja danych",
-    "Wizualizacje pomagają zrozumieć rozkład danych i relacje między zmiennymi. Poniżej przedstawiono rozkład zmiennej docelowej oraz histogramy dla wybranych zmiennych numerycznych, aby zilustrować ich rozkłady."
+    "### Podstawowa wizualizacja danych (Histogramy i Boxploty)",
+    "Wizualizacje pomagają zrozumieć rozkład danych i relacje między zmiennymi. Poniżej przedstawiono rozkład zmiennej docelowej oraz histogramy i boxploty dla wybranych zmiennych, aby zilustrować ich rozkłady i zależności od statusu cukrzycowego."
    ]
   },
   {
@@ -692,7 +691,7 @@ notebook_json_structure = {
 
 # Zapisz zawartość do pliku .ipynb
 with open("Diabetes_Risk_Classification_Project.ipynb", "w", encoding="utf-8") as f:
-    json.dump(notebook_json_structure, f, indent=2) # Używamy json.dump dla poprawnego formatowania
+    json.dump(notebook_json_structure, f, indent=2)
 
 print("Plik 'Diabetes_Risk_Classification_Project.ipynb' został pomyślnie wygenerowany.")
 print("Możesz go otworzyć w środowisku Jupyter.")
